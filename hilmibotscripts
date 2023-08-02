@@ -5,24 +5,83 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 
-bot = commands.Bot(command_prefix='!', intents=intents)
+# Defines a custom Select containing colour options
+# that the user can choose. The callback function
+# of this class is called when the user changes their choice
+class Dropdown(discord.ui.Select):
+    def __init__(self):
+
+        # Set the options that will be presented inside the dropdown
+        options = [
+            discord.SelectOption(label='Kırmızı', description='En sevdiğin renk kırmızı', emoji='🟥'),
+            discord.SelectOption(label='Yeşil', description='En sevdiğin renk yeşil', emoji='🟩'),
+            discord.SelectOption(label='Mavi', description='En sevdiğin renk mavi', emoji='🟦'),
+        ]
+
+        # The placeholder is what will be shown when no option is chosen
+        # The min and max values indicate we can only pick one of the three options
+        # The options parameter defines the dropdown options. We defined this above
+        super().__init__(placeholder='En sevdiğiniz renk...', min_values=1, max_values=1, options=options)
+
+    async def callback(self, interaction: discord.Interaction):
+        # Use the interaction object to send a response message containing
+        # the user's favourite colour or choice. The self object refers to the
+        # Select object, and the values attribute gets a list of the user's
+        # selected options. We only want the first one.
+        await interaction.response.send_message(f'Senin en sevdiğin renk {self.values[0]}')
+
+
+class DropdownView(discord.ui.View):
+    def __init__(self):
+        super().__init__()
+
+        # Adds the dropdown to our view object.
+        self.add_item(Dropdown())
+
+
+class Bot(commands.Bot):
+    def __init__(self):
+        intents = discord.Intents.default()
+        intents.message_content = True
+
+        super().__init__(command_prefix=commands.when_mentioned_or('!'), intents=intents)
+
+
+bot = Bot()
+
+
+@bot.command()
+async def renk(ctx):
+    """Sends a message with our dropdown containing colours"""
+
+    # Create the view containing our dropdown
+    view = DropdownView()
+
+    # Sending a message containing our view
+    await ctx.send('En sevdiğiniz rengi seçin:', view=view)
+
+
 
 @bot.event
 async def on_ready():
     print(f'{bot.user} a giriş yaptık.')
     print("Botunuz Online!")
 
+
 @bot.command()
 async def merhaba(ctx, to: discord.User = commands.parameter(default=lambda ctx: ctx.author)):
     await ctx.send(f'Merhaba {to.mention} :wave:')
+
 
 @bot.command()
 async def heh(ctx, count_heh = 5):
     await ctx.send("he" * count_heh)
 
+
 @bot.command()
 async def görüşürüz(ctx):
     await ctx.send(":wave:")
+
 
 @bot.command()
 async def yardım(ctx):
@@ -30,6 +89,8 @@ async def yardım(ctx):
     await ctx.send("!merhaba")
     await ctx.send("!heh -sayı-")
     await ctx.send("!görüşürüz")
+    await cts.send("!renk")
+
 
 @bot.event
 async def on_member_join(member):
@@ -37,4 +98,4 @@ async def on_member_join(member):
 
 
 #Token
-bot.run("Gizli Token")
+bot.run("Gizli Token Buraya")
