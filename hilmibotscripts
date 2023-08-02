@@ -5,25 +5,36 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 
-bot = commands.Bot(command_prefix='$', intents=intents)
+bot = commands.Bot(command_prefix='!', intents=intents)
 
 @bot.event
 async def on_ready():
-    print(f'{bot.user} olarak giriş yaptık')
+    print(f'{bot.user} a giriş yaptık.')
+    print("Botunuz Online!")
 
 @bot.command()
-async def hello(ctx):
-    await ctx.send(f'Merhaba {bot.user}! Ben bir botum!')
+async def merhaba(ctx, to: discord.User = commands.parameter(default=lambda ctx: ctx.author)):
+    await ctx.send(f'Merhaba {to.mention} :wave:')
 
 @bot.command()
 async def heh(ctx, count_heh = 5):
     await ctx.send("he" * count_heh)
 
+@bot.command()
+async def görüşürüz(ctx):
+    await ctx.send(":wave:")
+
+@bot.command()
+async def yardım(ctx):
+    await ctx.send("===Girebileceğiniz=Komutlar===")
+    await ctx.send("!merhaba")
+    await ctx.send("!heh -sayı-")
+    await ctx.send("!görüşürüz")
+
 @bot.event
 async def on_member_join(member):
-    await member.send(f"{member} sunucuya hoşgeldin!")
+    await member.send(f"{member} sunucuya hoşgeldin!:wave:")
 
 
-
-
-bot.run("Token")
+#Token
+bot.run("Gizli Token")
