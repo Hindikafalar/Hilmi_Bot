@@ -4,14 +4,26 @@ from discord.ext import commands
 from discord.ui import Select, View
 import random
 import os
+import time
 
-
+#asyncio.sleep()
 
 intents = discord.Intents.all()
 
 #---!---#
 bot = commands.Bot(command_prefix=commands.when_mentioned_or('!'), intents=intents)
 
+
+
+#Listeler
+emoji1 = "😀😀😀😀😀😀😀😀😀"
+        
+        
+emojiler = []
+
+
+#Değişkenler
+text = None
 
 
 
@@ -24,11 +36,12 @@ async def on_ready():
 
 
 
-#Sadece benim kullanabilmemi sağlayan kod:
+#Sadece benim veya moderatörlerin kullanabilmesini sağlayan kod:
 def sadece_ben():
     def predicate(ctx):
         return ctx.message.author.id == 895025358586408981
     return commands.check(predicate)
+
 
 #Kick Komutu
 @bot.command()
@@ -77,15 +90,79 @@ Error
 
 
 
-#Sohbetler
+# ▂▃▅▇█▓▒░ Sohbetler ░▒▓█▇▅▃▂
+
+
+
+
 @bot.command()
 async def merhaba(ctx, to: discord.User = commands.parameter(default=lambda ctx: ctx.author)):
-    await ctx.send(f'Merhaba {to.mention} :wave:')
+    selamlar = ["Selam!", "Merhaba!", "Na'ber?"]
+    secim = random.choice(selamlar)
+    await ctx.send(f'{secim} {ctx.author.mention} :wave:')
+    await ctx.send("Nasılsın?")
+
+    #1. Kontrol
+    def check6(a):
+        return a.content == "iyi" or a.content == "iyiyim"
+
+    masg = await bot.wait_for("message", check=check6)
+    await ctx.send(f"İyi olmana sevindim, {masg.author.mention}! :blush:")
+
+    #2. Kontrol
+    def check4(c):
+        return c.content == "iyi sen" or c.content == "iyi sen?"
+
+    mseg = await bot.wait_for("mesaj", check=check4)
+    await ctx.send("İyiyim teşekkürler!")
+
+    #3. Kontrol
+    def check5(l):
+        return l.content == "kötü" or l.content == "kötüyüm"
+
+    mseg = await bot.wait_for("message", check=check5)
+    await ctx.send("Kötü olmana üzüldüm.. :slight_frown:")
+
+    
+
+@bot.command()
+async def selam(ctx):
+    await ctx.send("Selam! :wave:")
 
 
 @bot.command()
-async def bye(ctx, count_heh = 5):
-    await ctx.send("bye " * count_heh)
+async def selamünaleyküm(ctx):
+    await ctx.send("Aleykümselam")
+
+
+@bot.command()
+async def naber(ctx):
+    await ctx.send("İyi senden n'aber?")
+
+    def check(m):
+        return m.content == "iyi"
+
+    masg = await bot.wait_for("message", check=check)
+    await ctx.send(f"İyi olmana sevindim. :blush:")
+
+    def check2(t):
+        return t.content == "kötü"
+
+    msgg = await bot.wait_for("message", check=check2)
+    await ctx.send("Kötü olmana üzüldüm. :pensive:")
+
+
+
+
+
+@bot.command()
+async def bye(ctx, count_bye = 5):
+    await ctx.send("bye " * count_bye)
+
+
+@bot.command()
+async def hoşçakal(ctx):
+    await ctx.send(":wave:")
 
 
 @bot.command()
@@ -94,10 +171,164 @@ async def görüşürüz(ctx):
 
 
 
-#Bir mesaj silindiğinde:
+#Emojiyi Bulma
+@bot.command()
+async def emoji_bul(ctx):
+    await ctx.send("✩░▒▓▆▅▃▂▁𝐄𝐦𝐨𝐣𝐢 𝐁𝐮𝐥𝐦𝐚▁▂▃▅▆▓▒░✩")
+    await ctx.send("10 saniye içinde aşağıdaki farklı emojiyi bul.")
+
+    sure = 2
+    for i in range(sure):
+        sure = sure - 1
+        time.sleep(1)
+    if sure == 0:
+        msg = await ctx.send("Hazır mısın?")
+
+
+    await msg.add_reaction(u"\u2705")
+    await msg.add_reaction(u"\U0001F6AB")
+    
+    try:
+        reaction, user = await bot.wait_for("reaction_add", check=lambda reaction, member: member == ctx.author and reaction.emoji in [u"\u2705", u"\U0001F6AB"], timeout=15.0)
+
+
+
+    except asyncio.TimeoutError:
+        await ctx.channel.send("İşaretleyecek misin yoksa işaretlemeyecek misin?")
+
+
+    else:
+        if reaction.emoji == u"\u2705":
+            emoji_msg = discord.Embed(color=discord.Colour.orange(), title="Farklı Emojiyi Bul", description="")
+            emoji_msg.add_field(name="", value="""
+        😀😀😀😀😀😀😀😀😀
+        😀😀😀😀😀😀😀😀😀
+        😀😀😀😀😃😀😀😀😀
+        😀😀😀😀😀😀😀😀😀
+        😀😀😀😀😀😀😀😀😀
+        😀😀😀😀😀😀😀😀😀
+        """, inline=True)
+            await ctx.channel.send(embed=emoji_msg)
+            await asyncio.sleep(10)
+            await ctx.send("Süren doldu!")
+
+
+        elif reaction.emoji == u"\U0001F6AB":
+            await ctx.send("Peki. Hazır olduğun zaman söyle.")
+
+
+
+
+
+
+#Çay Demleme
+@bot.command()
+async def çay_demle(ctx):
+    """Hilmi Bot sana çay demler."""
+    await ctx.send("Tamam. Demliyorum... :teapot:")
+    await ctx.send("30 saniyeye hazır olacak.")
+    await asyncio.sleep(30)
+    await ctx.send("Çayınız demlendi. 🍵")
+
+
+#Kahve Yapma
+@bot.command()
+async def kahve_yap(ctx):
+    """Hilmi Bot sana kahve yapar."""
+    await ctx.send("Tamam. Yapıyorum...")
+    await ctx.send("15 saniyeye hazır olacak.")
+    await asyncio.sleep(15)
+    await ctx.send("Kahveniz hazır. :coffee:")
+
+
+
+#Matematik
+@bot.command()
+async def matematik(ctx):
+    await ctx.send("=========| Matematik |=========")
+    embed = discord.Embed(color=discord.Colour.blue(), title="", description="")
+    embed.add_field(name="Hangi işlemi gerçekleştirmek istiyorsunuz?", value=f"""
+> Toplama
+> Çıkarma
+> Bölme
+> Çarpma
+> Karekökünü alma
+""", inline=True)
+    await ctx.send(embed=embed)
+    
+    def check(m):
+        return m.content == "Toplama" or m.content == "toplama"
+
+    msg = await bot.wait_for("message", check=check)
+
+
+    await ctx.send("Hangi iki sayıyı toplamak istiyorsunuz?")
+
+#@bot.event
+#async def on_message(message):
+    # Botun kendi mesajlarını görmezden gel
+    #if message.author == bot.user:
+        #return
+
+    # Kullanıcıya mesajın içeriğini geri gönder
+    #await message.channel.send(f"Şunu söylediniz: {message.content}")
+
+    
+
+
+
+    #-------------| Deneme |----------------#
+    class Dropdown(discord.ui.Select):
+        def __init__(self):
+
+            options = [
+                discord.SelectOption(label='Toplama', description='Girdiğin iki sayıyı toplar.', emoji='➕'),
+                discord.SelectOption(label='Çıkarma', description='Girdiğin iki sayıyı çıkartır.', emoji='➖'),
+                discord.SelectOption(label='Bölme', description='Girdiğin iki sayıyı böler.', emoji='➗'),
+                discord.SelectOption(label='Çarpma', description='Girdiğin iki sayıyı çarpar.', emoji='✖'),
+                discord.SelectOption(label='Karekökünü alma', description='Girdiğin sayının karekökünü alır.', emoji='√'),
+            ]
+                    
+
+
+            super().__init__(placeholder='Hangi işlemi gerçekleştirmek istiyorsunuz?', min_values=1, max_values=1, options=options)
+            
+            class DropdownView(discord.ui.View):
+                def __init__(self):
+                    super().__init__()
+
+                    self.add_item(Dropdown())
+
+            
+
+
+
+
+@bot.command()
+async def record_usage(ctx):
+    print(ctx.author, 'used', ctx.command, 'at', ctx.message.created_at)
+
+    
+
+
+#Bir mesaj silindiğinde
+
 @bot.event
 async def on_message_delete(message):
-    print(f'{message.author} Kişisi şu mesajı sildi: {message.content}')
+    global text
+    print(f'{message.author.display_name} kişisi şu mesajı sildi: {message.content}')
+    text = f'{message.author.display_name} kişisi şu mesajı sildi: {message.content}'
+
+
+
+@bot.command()
+async def kim_ne_sildi(ctx):
+    global text
+    if text:
+        await ctx.send(f"Son silinen mesaj: {text}")
+    else:
+        await ctx.send("Son silinen mesajı bulamıyorum.")
+
 
 
 
@@ -118,27 +349,27 @@ async def davet_et(ctx, user:discord.Member, *, message=None):
 
 
 
-#Help Command
-@bot.command()
-async def yardım(ctx):
-    """İkinci help komutu fakat biraz daha açıklayıcı."""
-    await ctx.send("===Girebileceğiniz=Komutlar===")
-    await ctx.send("!merhaba")
-    await ctx.send("!bay -sayı-")
-    await ctx.send("!görüşürüz")
-    await ctx.send("!mesaj_at @isim")
-    await ctx.send("!davet_linki @isim")
-    await ctx.send("==Eğlence==")
-    await ctx.send("!pythonmeme_at")
-    await ctx.send("!oyunmeme_at")
-    await ctx.send("!savaş @isim")
-    await ctx.send("==Moderatör=Komutları==")
-    await ctx.send("!kick @isim -sebep-")
-    await ctx.send("!ban @isim -sebep-")
+# #Help Command     ---Gereksiz bulundu
+# @bot.command()
+# async def yardım(ctx):
+#     """İkinci help komutu fakat biraz daha açıklayıcı."""
+#     await ctx.send("===Girebileceğiniz=Komutlar===")
+#     await ctx.send("!merhaba")
+#     await ctx.send("!bay -sayı-")
+#     await ctx.send("!görüşürüz")
+#     await ctx.send("!mesaj_at @isim")
+#     await ctx.send("!davet_linki @isim")
+#     await ctx.send("==Eğlence==")
+#     await ctx.send("!pythonmeme_at")
+#     await ctx.send("!oyunmeme_at")
+#     await ctx.send("!savaş @isim")
+#     await ctx.send("==Moderatör=Komutları==")
+#     await ctx.send("!kick @isim -sebep-")
+#     await ctx.send("!ban @isim -sebep-")
 
 
 
-#Memes
+#Mems
 @bot.command()
 async def pythonmeme_at(ctx):
     """Sadece python veya programlama ile ilgili memeler atar."""
@@ -165,19 +396,19 @@ async def oyunmeme_at(ctx):
 
 #Sunucuya biri geldiğinde:
 @bot.event
-async def on_member_join(member):
+async def on_member_join(ctx, member):
     await ctx.send(f"{member} sunucuya hoşgeldin!:wave:")
 
 
 #Sunucudan biri çıktığında:
 @bot.event
-async def on_member_remove(member):
+async def on_member_remove(ctx, member):
     await ctx.send(f"{member} sunudan ayrıldı. Gittiğine üzüldük..")
     await member.send("Yine bekleriz :wave:")
 
 
 
-
+#Savaş komutunun prototipi
 @bot.command()
 async def savaş(ctx, user:discord.Member, to: discord.User = commands.parameter(default=lambda ctx: ctx.author)):
     """Biriyle savaş başlatır."""
@@ -223,6 +454,7 @@ Kabul etmemek için ise ':no_entry_sign:' seçin.
                     super().__init__(placeholder='Bu tur ne yapacaksınız...', min_values=1, max_values=1, options=options)
 
                 async def callback(self, interaction: discord.Interaction):
+                    global select
                     select.disabled=True
                     if select.value[0] == "1" and user == to:
                         emb = discord.Embed(color=discord.Colour.red(), title="", description="")
@@ -268,6 +500,6 @@ Kabul etmemek için ise ':no_entry_sign:' seçin.
 
 
 
-
 #Token
-bot.run("Secret Token Goes Here!")
+bot.run("Token buraya yerleştirilir.")
+
