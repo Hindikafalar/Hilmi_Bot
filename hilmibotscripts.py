@@ -372,7 +372,7 @@ async def davet_et(ctx, user:discord.Member, *, message=None):
 #Mems
 @bot.command()
 async def pythonmeme_at(ctx):
-    """Sadece python veya programlama ile ilgili memeler atar."""
+    """Sadece python veya programlama ile ilgili memler atar."""
     liste = os.listdir("memes")
     rastgele_meme = random.choice(liste)
     tam_uzanti = "memes/" + rastgele_meme
@@ -383,7 +383,7 @@ async def pythonmeme_at(ctx):
 
 @bot.command()
 async def oyunmeme_at(ctx):
-    """Sadece oyun ile ilgili memeler atar."""
+    """Sadece oyun ile ilgili memler atar."""
     liste2 = os.listdir("gamememes")
     rastgele_meme2 = random.choice(liste2)
     tam_uzanti2 = "gamememes/" + rastgele_meme2
