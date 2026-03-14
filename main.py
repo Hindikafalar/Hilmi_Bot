@@ -10,20 +10,14 @@ import time
 
 intents = discord.Intents.all()
 
-#---!---#
+#Prefix
 bot = commands.Bot(command_prefix=commands.when_mentioned_or('!'), intents=intents)
 
 
 
-#Listeler
-emoji1 = "😀😀😀😀😀😀😀😀😀"
-        
-        
-emojiler = []
-
-
 #Değişkenler
 text = None
+afk_mode = None
 
 
 
@@ -91,9 +85,6 @@ Error
 
 
 # ▂▃▅▇█▓▒░ Sohbetler ░▒▓█▇▅▃▂
-
-
-
 
 @bot.command()
 async def merhaba(ctx, to: discord.User = commands.parameter(default=lambda ctx: ctx.author)):
@@ -168,57 +159,6 @@ async def hoşçakal(ctx):
 @bot.command()
 async def görüşürüz(ctx):
     await ctx.send(":wave:")
-
-
-
-#Emojiyi Bulma
-@bot.command()
-async def emoji_bul(ctx):
-    await ctx.send("✩░▒▓▆▅▃▂▁𝐄𝐦𝐨𝐣𝐢 𝐁𝐮𝐥𝐦𝐚▁▂▃▅▆▓▒░✩")
-    await ctx.send("10 saniye içinde aşağıdaki farklı emojiyi bul.")
-
-    sure = 2
-    for i in range(sure):
-        sure = sure - 1
-        time.sleep(1)
-    if sure == 0:
-        msg = await ctx.send("Hazır mısın?")
-
-
-    await msg.add_reaction(u"\u2705")
-    await msg.add_reaction(u"\U0001F6AB")
-    
-    try:
-        reaction, user = await bot.wait_for("reaction_add", check=lambda reaction, member: member == ctx.author and reaction.emoji in [u"\u2705", u"\U0001F6AB"], timeout=15.0)
-
-
-
-    except asyncio.TimeoutError:
-        await ctx.channel.send("İşaretleyecek misin yoksa işaretlemeyecek misin?")
-
-
-    else:
-        if reaction.emoji == u"\u2705":
-            emoji_msg = discord.Embed(color=discord.Colour.orange(), title="Farklı Emojiyi Bul", description="")
-            emoji_msg.add_field(name="", value="""
-        😀😀😀😀😀😀😀😀😀
-        😀😀😀😀😀😀😀😀😀
-        😀😀😀😀😃😀😀😀😀
-        😀😀😀😀😀😀😀😀😀
-        😀😀😀😀😀😀😀😀😀
-        😀😀😀😀😀😀😀😀😀
-        """, inline=True)
-            await ctx.channel.send(embed=emoji_msg)
-            await asyncio.sleep(10)
-            await ctx.send("Süren doldu!")
-
-
-        elif reaction.emoji == u"\U0001F6AB":
-            await ctx.send("Peki. Hazır olduğun zaman söyle.")
-
-
-
-
 
 
 #Çay Demleme
@@ -372,7 +312,7 @@ async def davet_et(ctx, user:discord.Member, *, message=None):
 #Mems
 @bot.command()
 async def pythonmeme_at(ctx):
-    """Sadece python veya programlama ile ilgili memler atar."""
+    """Sadece python veya programlama ile ilgili memeler atar."""
     liste = os.listdir("memes")
     rastgele_meme = random.choice(liste)
     tam_uzanti = "memes/" + rastgele_meme
@@ -383,7 +323,7 @@ async def pythonmeme_at(ctx):
 
 @bot.command()
 async def oyunmeme_at(ctx):
-    """Sadece oyun ile ilgili memler atar."""
+    """Sadece oyun ile ilgili memeler atar."""
     liste2 = os.listdir("gamememes")
     rastgele_meme2 = random.choice(liste2)
     tam_uzanti2 = "gamememes/" + rastgele_meme2
@@ -396,8 +336,9 @@ async def oyunmeme_at(ctx):
 
 #Sunucuya biri geldiğinde:
 @bot.event
-async def on_member_join(ctx, member):
-    await ctx.send(f"{member} sunucuya hoşgeldin!:wave:")
+async def on_member_join(member):
+    channel = bot.get_channel(1482473178981732413) #Yeni gelenlere özel ayrılan kanalın id'si / özel kanal
+    await channel.send(f"{member.mention} sunucuya hoşgeldin! :wave:")
 
 
 #Sunucudan biri çıktığında:
@@ -495,11 +436,48 @@ Kabul etmemek için ise ':no_entry_sign:' seçin.
 
 
 
+# Teknik
+@bot.command()
+async def user_info(ctx, user_id: int):
+    try:
+        user = await bot.fetch_user(user_id)
+
+        embed = discord.Embed(title=f"{user.name} Profili", color=0x5865F2)
+        embed.set_thumbnail(url=user.display_avatar.url)
+
+        embed.add_field(name="ID", value=user.id, inline=False)
+        embed.add_field(name="Görünen Adı", value=user.display_name, inline=False)
+        embed.add_field(name="Hesap oluşturma", value=user.created_at.strftime("%d %B %Y"), inline=False)
+
+        await ctx.send(embed=embed)
+
+    except:
+        await ctx.send("❌ Kullanıcı bulunamadı.")
+
+afk_user_id = 0
+
+@bot.command()
+async def afk(ctx, to: discord.User = commands.parameter(default=lambda ctx: ctx.author)):
+    global afk_mode, afk_user_id
+
+    user_id = ctx.author.id
+    user = await bot.fetch_user(user_id)
+
+    if afk_user_id == 0:
+        afk_user_id = user_id
+
+    if (afk_mode == False or afk_mode == None) and ctx.author.id == afk_user_id:
+        await ctx.send(f"| {user.display_name} kullanıcısı AFK moduna geçti. |")
+        afk_user_id = user_id
+        afk_mode = True
+    else:
+        await ctx.send("Zaten afk modundasın.")
 
 
+    
 
 
 
 #Token
-bot.run("Token buraya yerleştirilir.")
+bot.run("Tokeniniz")
 
