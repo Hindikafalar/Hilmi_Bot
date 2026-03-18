@@ -6,6 +6,7 @@ import random
 import os
 import time
 
+
 #asyncio.sleep()
 
 intents = discord.Intents.all()
@@ -15,9 +16,13 @@ bot = commands.Bot(command_prefix=commands.when_mentioned_or('!'), intents=inten
 
 
 
+#Listeler 
+emojiler = []
+
+
 #Değişkenler
+emoji1 = ""
 text = None
-afk_mode = None
 
 
 
@@ -85,6 +90,9 @@ Error
 
 
 # ▂▃▅▇█▓▒░ Sohbetler ░▒▓█▇▅▃▂
+
+
+
 
 @bot.command()
 async def merhaba(ctx, to: discord.User = commands.parameter(default=lambda ctx: ctx.author)):
@@ -159,6 +167,57 @@ async def hoşçakal(ctx):
 @bot.command()
 async def görüşürüz(ctx):
     await ctx.send(":wave:")
+
+
+
+#Emojiyi Bulma
+@bot.command()
+async def emoji_bul(ctx):
+    await ctx.send("✩░▒▓▆▅▃▂▁𝐄𝐦𝐨𝐣𝐢 𝐁𝐮𝐥𝐦𝐚▁▂▃▅▆▓▒░✩")
+    await ctx.send("10 saniye içinde aşağıdaki farklı emojiyi bul.")
+
+    sure = 2
+    for i in range(sure):
+        sure = sure - 1
+        time.sleep(1)
+    if sure == 0:
+        msg = await ctx.send("Hazır mısın?")
+
+
+    await msg.add_reaction(u"\u2705")
+    await msg.add_reaction(u"\U0001F6AB")
+    
+    try:
+        reaction, user = await bot.wait_for("reaction_add", check=lambda reaction, member: member == ctx.author and reaction.emoji in [u"\u2705", u"\U0001F6AB"], timeout=15.0)
+
+
+
+    except asyncio.TimeoutError:
+        await ctx.channel.send("İşaretleyecek misin yoksa işaretlemeyecek misin?")
+
+
+    else:
+        if reaction.emoji == u"\u2705":
+            emoji_msg = discord.Embed(color=discord.Colour.orange(), title="Farklı Emojiyi Bul", description="")
+            emoji_msg.add_field(name="", value="""
+        😀😀😀😀😀😀😀😀😀
+        😀😀😀😀😀😀😀😀😀
+        😀😀😀😀😃😀😀😀😀
+        😀😀😀😀😀😀😀😀😀
+        😀😀😀😀😀😀😀😀😀
+        😀😀😀😀😀😀😀😀😀
+        """, inline=True)
+            await ctx.channel.send(embed=emoji_msg)
+            await asyncio.sleep(10)
+            await ctx.send("Süren doldu!")
+
+
+        elif reaction.emoji == u"\U0001F6AB":
+            await ctx.send("Peki. Hazır olduğun zaman söyle.")
+
+
+
+
 
 
 #Çay Demleme
@@ -436,7 +495,7 @@ Kabul etmemek için ise ':no_entry_sign:' seçin.
 
 
 
-# Teknik
+# Araçlar
 @bot.command()
 async def user_info(ctx, user_id: int):
     try:
@@ -454,30 +513,62 @@ async def user_info(ctx, user_id: int):
     except:
         await ctx.send("❌ Kullanıcı bulunamadı.")
 
-afk_user_id = 0
+
+user_aids = {}
+user_afk = {} # user_id: True/False
+
+aid_digit = 4
+
+
+# Kullanıcı mesaj gönderirse afk moddan çıksın
+@bot.event
+async def on_message(message):
+    if message.author.bot:
+        return
+    
+    user_id = message.author.id
+    msg = message.content
+
+    if user_afk.get(user_id, False):
+        if not msg.startswith("!"):
+            user_afk[user_id] = False
+            await message.channel.send(f"| {message.author.display_name} kullanıcısı artık AFK değil. :x: |")
+
+    await bot.process_commands(message)
+
 
 @bot.command()
-async def afk(ctx, to: discord.User = commands.parameter(default=lambda ctx: ctx.author)):
-    global afk_mode, afk_user_id
+async def afk(ctx, to: discord.User = None):
+    global afk_mode, user_aids
+
+    if to is None:
+        to = ctx.author
 
     user_id = ctx.author.id
     user = await bot.fetch_user(user_id)
 
-    if afk_user_id == 0:
-        afk_user_id = user_id
-
-    if (afk_mode == False or afk_mode == None) and ctx.author.id == afk_user_id:
-        await ctx.send(f"| {user.display_name} kullanıcısı AFK moduna geçti. |")
-        afk_user_id = user_id
-        afk_mode = True
+    if user_id in user_aids:
+        if user_afk.get(user_id, False):
+            user_afk[user_id] = False
+            await ctx.send(f"| AFK modundan çıktınız. :white_check_mark: |")
+        else:
+            user_afk[user_id] = True
+            await ctx.send(f"| {user.display_name} kullanıcısı AFK moduna geçti. :white_check_mark: |")
     else:
-        await ctx.send("Zaten afk modundasın.")
+        while True:
+            personal_aid = random.randint(10**(aid_digit-1), 10**aid_digit - 1)
+            
+            if personal_aid not in user_aids.values():
+                print(f"{user.display_name} kullanıcısı için yeni aid oluşturuldu:", personal_aid)
+
+                user_aids[user_id] = personal_aid
+                user_afk[user_id] = True
+
+                await ctx.send(f"| {user.display_name} kullanıcısı AFK moduna geçti. :white_check_mark: |")
+                break
+            else:
+                print("Başarısız aid:", personal_aid, "\nYeniden deneniyor...")
 
 
-    
 
-
-
-#Token
-bot.run("Tokeniniz")
-
+bot.run("Gizli Token")
