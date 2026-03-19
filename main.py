@@ -5,7 +5,7 @@ from discord.ui import Select, View
 import random
 import os
 import time
-a
+
 
 #asyncio.sleep()
 
@@ -22,7 +22,6 @@ emojiler = []
 
 #Değişkenler
 emoji1 = ""
-text = None
 
 
 
@@ -310,21 +309,29 @@ async def record_usage(ctx):
     
 
 
-#Bir mesaj silindiğinde
+deleted_texts = []
+deleted_text = ""
 
+#Bir mesaj silindiğinde
 @bot.event
 async def on_message_delete(message):
-    global text
+    global deleted_text, deleted_texts
+
     print(f'{message.author.display_name} kişisi şu mesajı sildi: {message.content}')
-    text = f'{message.author.display_name} kişisi şu mesajı sildi: {message.content}'
+    deleted_text = f'"{message.content}" {message.author.display_name} tarafından silindi.'
+    user_id = message.author.display_name
+    deleted_texts.append(deleted_text)
+    #deleted_texts[user_id] = deleted_text
 
 
 
 @bot.command()
-async def kim_ne_sildi(ctx):
-    global text
-    if text:
-        await ctx.send(f"Son silinen mesaj: {text}")
+async def silinen_mesajlar(ctx):
+    global deleted_text, deleted_texts
+    if deleted_texts:
+        await ctx.send(f"Son silinen mesajlar:")
+        for i in range(len(deleted_texts)):
+            await ctx.send("    ", deleted_texts[i])
     else:
         await ctx.send("Son silinen mesajı bulamıyorum.")
 
@@ -519,7 +526,6 @@ user_afk = {} # user_id: True/False
 
 aid_digit = 4
 
-
 # Kullanıcı mesaj gönderirse afk moddan çıksın
 @bot.event
 async def on_message(message):
@@ -532,42 +538,64 @@ async def on_message(message):
     if user_afk.get(user_id, False):
         if not msg.startswith("!"):
             user_afk[user_id] = False
+
+            role = discord.utils.get(message.guild.roles, name="AFK")
+            if role in message.author.roles:
+                await message.author.remove_roles(role)
+                
             await message.channel.send(f"| {message.author.display_name} kullanıcısı artık AFK değil. :x: |")
 
     await bot.process_commands(message)
 
 
 @bot.command()
-async def afk(ctx, to: discord.User = None):
-    global afk_mode, user_aids
-
-    if to is None:
-        to = ctx.author
+async def afk(ctx):
+    global user_aids
 
     user_id = ctx.author.id
-    user = await bot.fetch_user(user_id)
+    role = discord.utils.get(ctx.guild.roles, name="AFK")
+
+    if role is None:
+        return await ctx.send("AFK rolü bulunamadı. Lütfen AFK adında bir rol oluşturun.")
 
     if user_id in user_aids:
         if user_afk.get(user_id, False):
             user_afk[user_id] = False
+            await ctx.author.remove_roles(role)
             await ctx.send(f"| AFK modundan çıktınız. :white_check_mark: |")
         else:
             user_afk[user_id] = True
-            await ctx.send(f"| {user.display_name} kullanıcısı AFK moduna geçti. :white_check_mark: |")
+            await ctx.author.add_roles(role)
+            await ctx.send(f"| {ctx.author.display_name} kullanıcısı AFK moduna geçti. :white_check_mark: |")
     else:
         while True:
             personal_aid = random.randint(10**(aid_digit-1), 10**aid_digit - 1)
             
             if personal_aid not in user_aids.values():
-                print(f"{user.display_name} kullanıcısı için yeni aid oluşturuldu:", personal_aid)
+                print(f"{ctx.author.display_name} kullanıcısı için yeni aid oluşturuldu:", personal_aid)
 
                 user_aids[user_id] = personal_aid
                 user_afk[user_id] = True
 
-                await ctx.send(f"| {user.display_name} kullanıcısı AFK moduna geçti. :white_check_mark: |")
+                await ctx.author.add_roles(role)
+                await ctx.send(f"| {ctx.author.display_name} kullanıcısı AFK moduna geçti. :white_check_mark: |")
                 break
             else:
                 print("Başarısız aid:", personal_aid, "\nYeniden deneniyor...")
+
+
+
+@bot.command()
+@commands.has_permissions(manage_roles=True)
+async def rol_ekle(ctx, member: discord.Member, role: discord.Role):
+    role 
+    try:
+        await member.add_roles(role)
+        await ctx.send(f"✅ {role.name} rolü başarıyla {member.display_name} kullanıcısına verildi.")
+    except discord.Forbidden:
+        await ctx.send("❌ Bu rolü vermek için yetkim yetmiyor (Botun rolü, vermeye çalıştığı rolden daha üstte olmalı).")
+    except Exception as e:
+        await ctx.send(f"❌ Bir hata oluştu: {e}")
 
 
 
