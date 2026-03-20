@@ -7,8 +7,6 @@ import os
 import time
 
 
-#asyncio.sleep()
-
 intents = discord.Intents.all()
 
 #Prefix
@@ -317,8 +315,11 @@ deleted_text = ""
 async def on_message_delete(message):
     global deleted_text, deleted_texts
 
+    if message.author.bot:
+        return
+
     print(f'{message.author.display_name} kişisi şu mesajı sildi: {message.content}')
-    deleted_text = f'"{message.content}" {message.author.display_name} tarafından silindi.'
+    deleted_text = f'"{message.content}"  {message.author.display_name} adlı kullanıcı tarafından gönderilmişti.'
     user_id = message.author.display_name
     deleted_texts.append(deleted_text)
     #deleted_texts[user_id] = deleted_text
@@ -331,7 +332,7 @@ async def silinen_mesajlar(ctx):
     if deleted_texts:
         await ctx.send(f"Son silinen mesajlar:")
         for i in range(len(deleted_texts)):
-            await ctx.send("    ", deleted_texts[i])
+            await ctx.send(f"- {deleted_texts[i]}")
     else:
         await ctx.send("Son silinen mesajı bulamıyorum.")
 
@@ -378,14 +379,13 @@ async def davet_et(ctx, user:discord.Member, *, message=None):
 #Mems
 @bot.command()
 async def pythonmeme_at(ctx):
-    """Sadece python veya programlama ile ilgili memeler atar."""
+    """Sadece python ve programlama ile ilgili memeler atar."""
     liste = os.listdir("memes")
     rastgele_meme = random.choice(liste)
     tam_uzanti = "memes/" + rastgele_meme
     f = open(tam_uzanti, "rb")
     meme = discord.File(f)
     await ctx.send(file=meme)
-    await ctx.send(":rofl:")
 
 @bot.command()
 async def oyunmeme_at(ctx):
@@ -396,7 +396,6 @@ async def oyunmeme_at(ctx):
     f2 = open(tam_uzanti2, "rb")
     meme2 = discord.File(f2)
     await ctx.send(file=meme2)
-    await ctx.send(":rofl:")
 
 
 
@@ -596,7 +595,6 @@ async def rol_ekle(ctx, member: discord.Member, role: discord.Role):
         await ctx.send("❌ Bu rolü vermek için yetkim yetmiyor (Botun rolü, vermeye çalıştığı rolden daha üstte olmalı).")
     except Exception as e:
         await ctx.send(f"❌ Bir hata oluştu: {e}")
-
 
 
 bot.run("Gizli Token")
