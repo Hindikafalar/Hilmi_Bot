@@ -7,6 +7,8 @@ import os
 import time
 
 
+#asyncio.sleep()
+
 intents = discord.Intents.all()
 
 #Prefix
@@ -89,8 +91,6 @@ Error
 # ▂▃▅▇█▓▒░ Sohbetler ░▒▓█▇▅▃▂
 
 
-
-
 @bot.command()
 async def merhaba(ctx, to: discord.User = commands.parameter(default=lambda ctx: ctx.author)):
     selamlar = ["Selam!", "Merhaba!", "Na'ber?"]
@@ -138,11 +138,11 @@ async def naber(ctx):
     def check(m):
         return m.content == "iyi"
 
-    masg = await bot.wait_for("message", check=check)
-    await ctx.send(f"İyi olmana sevindim. :blush:")
-
     def check2(t):
         return t.content == "kötü"
+
+    masg = await bot.wait_for("message", check=check)
+    await ctx.send(f"İyi olmana sevindim. :blush:")
 
     msgg = await bot.wait_for("message", check=check2)
     await ctx.send("Kötü olmana üzüldüm. :pensive:")
@@ -221,82 +221,20 @@ async def emoji_bul(ctx):
 @bot.command()
 async def çay_demle(ctx):
     """Hilmi Bot sana çay demler."""
-    await ctx.send("Tamam. Demliyorum... :teapot:")
+    await ctx.send("Tamam demliyorum... :teapot:")
     await ctx.send("30 saniyeye hazır olacak.")
     await asyncio.sleep(30)
-    await ctx.send("Çayınız demlendi. 🍵")
+    await ctx.send(f"Çayınız demlendi {ctx.author.display_name}. 🍵")
 
 
 #Kahve Yapma
 @bot.command()
 async def kahve_yap(ctx):
     """Hilmi Bot sana kahve yapar."""
-    await ctx.send("Tamam. Yapıyorum...")
+    await ctx.send("Tamam yapıyorum...")
     await ctx.send("15 saniyeye hazır olacak.")
     await asyncio.sleep(15)
-    await ctx.send("Kahveniz hazır. :coffee:")
-
-
-
-#Matematik
-@bot.command()
-async def matematik(ctx):
-    await ctx.send("=========| Matematik |=========")
-    embed = discord.Embed(color=discord.Colour.blue(), title="", description="")
-    embed.add_field(name="Hangi işlemi gerçekleştirmek istiyorsunuz?", value=f"""
-> Toplama
-> Çıkarma
-> Bölme
-> Çarpma
-> Karekökünü alma
-""", inline=True)
-    await ctx.send(embed=embed)
-    
-    def check(m):
-        return m.content == "Toplama" or m.content == "toplama"
-
-    msg = await bot.wait_for("message", check=check)
-
-
-    await ctx.send("Hangi iki sayıyı toplamak istiyorsunuz?")
-
-#@bot.event
-#async def on_message(message):
-    # Botun kendi mesajlarını görmezden gel
-    #if message.author == bot.user:
-        #return
-
-    # Kullanıcıya mesajın içeriğini geri gönder
-    #await message.channel.send(f"Şunu söylediniz: {message.content}")
-
-    
-
-
-
-    #-------------| Deneme |----------------#
-    class Dropdown(discord.ui.Select):
-        def __init__(self):
-
-            options = [
-                discord.SelectOption(label='Toplama', description='Girdiğin iki sayıyı toplar.', emoji='➕'),
-                discord.SelectOption(label='Çıkarma', description='Girdiğin iki sayıyı çıkartır.', emoji='➖'),
-                discord.SelectOption(label='Bölme', description='Girdiğin iki sayıyı böler.', emoji='➗'),
-                discord.SelectOption(label='Çarpma', description='Girdiğin iki sayıyı çarpar.', emoji='✖'),
-                discord.SelectOption(label='Karekökünü alma', description='Girdiğin sayının karekökünü alır.', emoji='√'),
-            ]
-                    
-
-
-            super().__init__(placeholder='Hangi işlemi gerçekleştirmek istiyorsunuz?', min_values=1, max_values=1, options=options)
-            
-            class DropdownView(discord.ui.View):
-                def __init__(self):
-                    super().__init__()
-
-                    self.add_item(Dropdown())
-
-            
-
+    await ctx.send(f"Kahveniz hazır {ctx.author.display_name}. :coffee:")
 
 
 
@@ -320,8 +258,8 @@ async def on_message_delete(message):
 
     print(f'{message.author.display_name} kişisi şu mesajı sildi: {message.content}')
     deleted_text = f'"{message.content}"  {message.author.display_name} adlı kullanıcı tarafından gönderilmişti.'
-    user_id = message.author.display_name
     deleted_texts.append(deleted_text)
+    #user_id = message.author.display_name
     #deleted_texts[user_id] = deleted_text
 
 
@@ -335,14 +273,6 @@ async def silinen_mesajlar(ctx):
             await ctx.send(f"- {deleted_texts[i]}")
     else:
         await ctx.send("Son silinen mesajı bulamıyorum.")
-
-
-
-
-@bot.command()
-async def mesaj_at(ctx, user:discord.Member, *, message=None):
-    """Hilmi Bot'la mesajlaşmanı sağlar."""
-    await user.send("Naber?")
 
 @sadece_ben()
 @bot.command()
@@ -448,7 +378,6 @@ Kabul etmemek için ise ':no_entry_sign:' seçin.
             class Dropdown(discord.ui.Select):
                 def __init__(self):
 
-                    # Set the options that will be presented inside the dropdown
                     options = [
                         discord.SelectOption(label='Saldır', description='Bu tur karşındakine saldır!', emoji='🗡'),
                         discord.SelectOption(label='Korun', description='Bu tur korun!', emoji='🛡'),
@@ -520,7 +449,7 @@ async def user_info(ctx, user_id: int):
         await ctx.send("❌ Kullanıcı bulunamadı.")
 
 
-user_aids = {}
+user_ids = {}
 user_afk = {} # user_id: True/False
 
 aid_digit = 4
@@ -542,45 +471,36 @@ async def on_message(message):
             if role in message.author.roles:
                 await message.author.remove_roles(role)
                 
-            await message.channel.send(f"| {message.author.display_name} kullanıcısı artık AFK değil. :x: |")
+            await message.channel.send(f"| {message.author.mention} kullanıcısı artık AFK değil. :x: |")
 
     await bot.process_commands(message)
 
 
 @bot.command()
 async def afk(ctx):
-    global user_aids
+    global user_ids
 
     user_id = ctx.author.id
     role = discord.utils.get(ctx.guild.roles, name="AFK")
 
     if role is None:
         return await ctx.send("AFK rolü bulunamadı. Lütfen AFK adında bir rol oluşturun.")
-
-    if user_id in user_aids:
+    
+    if user_id in user_ids:
         if user_afk.get(user_id, False):
             user_afk[user_id] = False
             await ctx.author.remove_roles(role)
-            await ctx.send(f"| AFK modundan çıktınız. :white_check_mark: |")
+            await ctx.send(f"| AFK modundan çıktınız {ctx.author.mention}. :white_check_mark: |")
         else:
             user_afk[user_id] = True
             await ctx.author.add_roles(role)
-            await ctx.send(f"| {ctx.author.display_name} kullanıcısı AFK moduna geçti. :white_check_mark: |")
+            await ctx.send(f"| {ctx.author.mention} kullanıcısı AFK moduna geçti. :white_check_mark: |")
     else:
-        while True:
-            personal_aid = random.randint(10**(aid_digit-1), 10**aid_digit - 1)
-            
-            if personal_aid not in user_aids.values():
-                print(f"{ctx.author.display_name} kullanıcısı için yeni aid oluşturuldu:", personal_aid)
+        user_ids[user_id] = user_id
+        user_afk[user_id] = True
 
-                user_aids[user_id] = personal_aid
-                user_afk[user_id] = True
-
-                await ctx.author.add_roles(role)
-                await ctx.send(f"| {ctx.author.display_name} kullanıcısı AFK moduna geçti. :white_check_mark: |")
-                break
-            else:
-                print("Başarısız aid:", personal_aid, "\nYeniden deneniyor...")
+        await ctx.author.add_roles(role)
+        await ctx.send(f"| {ctx.author.mention} kullanıcısı AFK moduna geçti. :white_check_mark: |")
 
 
 
@@ -592,7 +512,7 @@ async def rol_ekle(ctx, member: discord.Member, role: discord.Role):
         await member.add_roles(role)
         await ctx.send(f"✅ {role.name} rolü başarıyla {member.display_name} kullanıcısına verildi.")
     except discord.Forbidden:
-        await ctx.send("❌ Bu rolü vermek için yetkim yetmiyor (Botun rolü, vermeye çalıştığı rolden daha üstte olmalı).")
+        await ctx.send("❌ Bu rolü vermek için yetkim yetmiyor. Bana ait rol en üstte olmalı.")
     except Exception as e:
         await ctx.send(f"❌ Bir hata oluştu: {e}")
 
