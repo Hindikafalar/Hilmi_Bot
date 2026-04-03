@@ -452,7 +452,6 @@ async def user_info(ctx, user_id: int):
 user_ids = {}
 user_afk = {} # user_id: True/False
 
-aid_digit = 4
 
 # Kullanıcı mesaj gönderirse afk moddan çıksın
 @bot.event
